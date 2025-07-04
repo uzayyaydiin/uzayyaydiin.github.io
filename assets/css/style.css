@@ -1,0 +1,88 @@
+/* Genel Ayarlar (Global Styles) */
+body {
+    font-family: 'Arial', sans-serif; /* Daha profesyonel bir font başlangıcı */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8; /* Açık gri arka plan */
+    color: #333; /* Koyu metin rengi */
+}
+
+/* Başlık Alanı (Header) */
+header {
+    background-color: #2c3e50; /* Koyu mavi */
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+/* Navigasyon Menüsü (Navigation Menu) */
+nav ul {
+    list-style: none; /* Madde işaretlerini kaldır */
+    padding: 0;
+    margin: 0;
+    display: flex; /* Menü elemanlarını yan yana hizala */
+    justify-content: center; /* Ortaya hizala */
+}
+
+nav ul li {
+    margin: 0 15px; /* Menü elemanları arasında boşluk */
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none; /* Alt çizgiyi kaldır */
+    font-weight: bold;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease; /* Hover efekti için yumuşak geçiş */
+}
+
+nav ul li a:hover {
+    background-color: #34495e; /* Hover durumunda hafif koyu */
+    border-radius: 4px; /* Köşeleri yuvarla */
+}
+
+/* Ana İçerik Alanı (Main Content Area) */
+main {
+    padding: 20px;
+    max-width: 960px; /* İçeriğin maksimum genişliği */
+    margin: 20px auto; /* Ortalamak için üst/alt ve otomatik sağ/sol marj */
+    background-color: #fff; /* İçerik alanı arka planı beyaz */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Hafif gölge efekti */
+    border-radius: 8px; /* Köşeleri yuvarla */
+}
+
+section {
+    margin-bottom: 30px; /* Bölümler arası boşluk */
+}
+
+/* Başlıklar (Headings) */
+h1, h2, h3 {
+    color: #2c3e50; /* Başlıklar için ana renk */
+    border-bottom: 2px solid #3498db; /* Mavi bir çizgi */
+    padding-bottom: 5px; /* Çizgi ile metin arası boşluk */
+    margin-bottom: 20px; /* Başlık altı boşluk */
+}
+
+/* Footer Alanı (Footer) */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #2c3e50; /* Koyu mavi */
+    color: #fff;
+    margin-top: 30px;
+}
+
+/* Duyarlı Tasarım (Responsive Design - Mobil Cihazlar İçin) */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column; /* Mobil görünümde menü elemanlarını alt alta getir */
+    }
+    nav ul li {
+        margin: 5px 0;
+    }
+    main {
+        margin: 10px;
+        padding: 15px;
+    }
+}
