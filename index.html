@@ -1,137 +1,183 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>M.Sc. Uzay Aydın</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>M.Sc. Uzay Aydın</title>
+<style>
+  /* Temel stil */
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(circle at center, #2a003f 0%, #000000 90%);
+    color: #eee;
+  }
 
-  <!-- Stil dosyası: Burada CSS direkt eklendi -->
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
+  #galaxy-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -1;
+    display: block;
+  }
 
-    #particles-js {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(ellipse at center, #0b0c10 0%, #000000 100%);
-      z-index: -1;
-    }
+  header, main, footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 20px;
+  }
 
-    header, main, footer {
-      position: relative;
-      z-index: 1;
-      color: #ffffff;
-      text-align: center;
-    }
+  nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 30px 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+  }
 
-    nav ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      padding: 0;
-    }
+  nav a {
+    color: #9faaff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
 
-    nav li {
-      margin: 0 15px;
-    }
+  nav a:hover {
+    color: #f4a7d1;
+  }
 
-    a {
-      color: #00ffff;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  footer p {
+    font-size: 0.9rem;
+    opacity: 0.6;
+  }
+</style>
 </head>
-
 <body>
-  <!-- Arka plan için partikül katmanı -->
-  <div id="particles-js"></div>
 
-  <!-- Mevcut sayfa içeriğin -->
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Ana Sayfa</a></li>
-        <li><a href="publications.html">Yayınlar</a></li>
-        <li><a href="research.html">Araştırma</a></li>
-        <li><a href="cv.pdf" target="_blank">CV</a></li>
-        <li><a href="contact.html">İletişim</a></li>
-      </ul>
-    </nav>
-  </header>
+<canvas id="galaxy-canvas"></canvas>
 
-  <main>
-    <section id="about">
-      <h1>M.Sc. Uzay Aydın</h1>
-      <h2></h2>
-      <p>Merhaba! Ben Uzay Aydın.</p>
-    </section>
-  </main>
+<header>
+  <nav>
+    <ul>
+      <li><a href="index.html">Ana Sayfa</a></li>
+      <li><a href="publications.html">Yayınlar</a></li>
+      <li><a href="research.html">Araştırma</a></li>
+      <li><a href="cv.pdf" target="_blank">CV</a></li>
+      <li><a href="contact.html">İletişim</a></li>
+    </ul>
+  </nav>
+</header>
 
-  <footer>
-    <p>&copy; 2025 Uzay Aydın. Tüm Hakları Saklıdır.</p>
-  </footer>
+<main>
+  <section id="about">
+    <h1>M.Sc. Uzay Aydın</h1>
+    <p>Merhaba! Ben Uzay Aydın.</p>
+  </section>
+</main>
 
-  <!-- particles.js kütüphanesi -->
-  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<footer>
+  <p>&copy; 2025 Uzay Aydın. Tüm Hakları Saklıdır.</p>
+</footer>
 
-  <!-- partikül ayarları -->
-  <script>
-    particlesJS("particles-js", {
-      particles: {
-        number: {
-          value: 100,
-          density: { enable: true, value_area: 800 }
-        },
-        color: {
-          value: ["#00bfff", "#ff69b4", "#7b68ee"]
-        },
-        shape: {
-          type: "circle"
-        },
-        opacity: {
-          value: 0.8,
-          random: true
-        },
-        size: {
-          value: 3,
-          random: true
-        },
-        line_linked: {
-          enable: false
-        },
-        move: {
-          enable: true,
-          speed: 2,
-          direction: "none",
-          random: true,
-          straight: false,
-          out_mode: "out"
-        }
-      },
-      interactivity: {
-        detect_on: "canvas",
-        events: {
-          onhover: { enable: true, mode: "repulse" },
-          onclick: { enable: true, mode: "push" },
-          resize: true
-        },
-        modes: {
-          repulse: { distance: 100 },
-          push: { particles_nb: 4 }
-        }
-      },
-      retina_detect: true
+<script>
+(() => {
+  const canvas = document.getElementById('galaxy-canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height, cx, cy;
+  let stars = [];
+  const starCount = 350;
+
+  // Renk paleti starburst galaksi teması: mor, pembe, mavi tonları
+  const colors = ['#7b68ee', '#ff69b4', '#00bfff', '#dda0dd'];
+
+  // Yeniden boyutlandır
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    cx = width / 2;
+    cy = height / 2;
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  // Star objesi
+  class Star {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      // Merkezi ışıma etkisi için merkezden dışa doğru konumlar
+      this.radius = Math.random() * (Math.min(cx, cy) - 20);
+      this.angle = Math.random() * 2 * Math.PI;
+      this.size = 0.8 + Math.random() * 1.5;
+      this.speed = 0.001 + Math.random() * 0.003;
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.twinkle = Math.random() * 1000;
+    }
+    update() {
+      this.radius += this.speed;
+      if (this.radius > Math.min(cx, cy)) this.reset();
+      this.twinkle += 0.02;
+    }
+    draw() {
+      const x = cx + this.radius * Math.cos(this.angle);
+      const y = cy + this.radius * Math.sin(this.angle);
+
+      // Parlaklık osilatörü
+      const brightness = (Math.sin(this.twinkle) + 1) / 2 * 0.8 + 0.2;
+
+      // Yıldız parlaklığı
+      ctx.beginPath();
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, this.size * 5);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${brightness})`);
+      grad.addColorStop(0.5, `${this.color}88`);
+      grad.addColorStop(1, `${this.color}00`);
+      ctx.fillStyle = grad;
+      ctx.arc(x, y, this.size * 2, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
+
+  // Initialize stars
+  function initStars() {
+    stars = [];
+    for(let i = 0; i < starCount; i++) {
+      stars.push(new Star());
+    }
+  }
+
+  // Ana animasyon
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Hafif merkezi parlama
+    const centerGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(cx, cy));
+    centerGradient.addColorStop(0, 'rgba(255, 182, 193, 0.12)');
+    centerGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = centerGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    stars.forEach(star => {
+      star.update();
+      star.draw();
     });
-  </script>
+
+    requestAnimationFrame(animate);
+  }
+
+  // Setup
+  window.addEventListener('resize', () => {
+    resize();
+    initStars();
+  });
+
+  resize();
+  initStars();
+  animate();
+
+})();
+</script>
+
 </body>
 </html>
