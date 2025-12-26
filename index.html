@@ -5,16 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>M.Sc. Uzay Aydın</title>
 <style>
-  /* Temel stil */
   html, body {
-    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    margin: 0; padding: 0; height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: radial-gradient(circle at center, #2a003f 0%, #000000 90%);
     color: #eee;
   }
 
+  body {
+    overflow-y: auto;
+  }
+
   #galaxy-canvas {
-    position: fixed; top: 0; left: 0;
+    position: fixed;
+    top: 0; left: 0;
     width: 100vw; height: 100vh;
     z-index: -1;
     display: block;
@@ -40,11 +44,38 @@
     color: #9faaff;
     text-decoration: none;
     font-weight: 600;
-    transition: color 0.3s ease;
   }
 
   nav a:hover {
     color: #f4a7d1;
+  }
+
+  section {
+    max-width: 900px;
+    margin: 0 auto 60px auto;
+    text-align: left;
+  }
+
+  h1, h2 {
+    text-align: center;
+  }
+
+  .meeting {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+  }
+
+  .meeting h3 {
+    margin-top: 0;
+    color: #f4a7d1;
+  }
+
+  .meta {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 10px;
   }
 
   footer p {
@@ -70,14 +101,54 @@
 </header>
 
 <main>
+
   <section id="about">
     <h1>M.Sc. Uzay Aydın</h1>
-    <p>Merhaba! Ben Uzay Aydın.</p>
+    <p style="text-align:center;">
+      Astronomy & Astrophysics · Galaxy Evolution · AGN · Astrostatistics
+    </p>
   </section>
+
+  <section id="meetings">
+    <h2>Meetings & Workshops</h2>
+
+    <div class="meeting">
+      <h3>Astrostatistics Summer School (19th)</h3>
+      <div class="meta">
+        Penn State Eberly College of Science — June 2024
+      </div>
+      <p>
+        Successfully completed the 19th Astrostatistics Summer School, an intensive program focused on
+        R programming, data science, data analysis, and astrostatistics. The program included advanced
+        training in statistical methodologies applied to astronomical research, with lectures and hands-on
+        sessions led by experts such as Eric Feigelson and Dr. Jogesh Babu.
+      </p>
+    </div>
+
+    <div class="meeting">
+      <h3>LSST AGN Science Collaboration Meeting 2025</h3>
+      <div class="meta">
+        Durham University, United Kingdom — July 2025
+      </div>
+      <p>
+        Participated in the LSST AGN Science Collaboration Meeting held at Durham University.
+        The meeting brought together researchers working on Active Galactic Nuclei within the LSST framework.
+        Scientific discussions covered AGN selection techniques, time-domain science, photometric
+        classification, and preparatory work for LSST Data Release 1.
+      </p>
+      <p>
+        Engaged in collaborative sessions on galaxy–AGN co-evolution, variability-based selection methods,
+        and data-intensive analysis workflows, gaining insight into large-scale extragalactic survey
+        planning and international collaboration.
+      </p>
+    </div>
+
+  </section>
+
 </main>
 
 <footer>
-  <p>&copy; 2025 Uzay Aydın. Tüm Hakları Saklıdır.</p>
+  <p>&copy; 2025 Uzay Aydın. All rights reserved.</p>
 </footer>
 
 <script>
@@ -87,11 +158,8 @@
   let width, height, cx, cy;
   let stars = [];
   const starCount = 350;
-
-  // Renk paleti starburst galaksi teması: mor, pembe, mavi tonları
   const colors = ['#7b68ee', '#ff69b4', '#00bfff', '#dda0dd'];
 
-  // Yeniden boyutlandır
   function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
@@ -101,13 +169,9 @@
     canvas.height = height;
   }
 
-  // Star objesi
   class Star {
-    constructor() {
-      this.reset();
-    }
+    constructor() { this.reset(); }
     reset() {
-      // Merkezi ışıma etkisi için merkezden dışa doğru konumlar
       this.radius = Math.random() * (Math.min(cx, cy) - 20);
       this.angle = Math.random() * 2 * Math.PI;
       this.size = 0.8 + Math.random() * 1.5;
@@ -123,14 +187,10 @@
     draw() {
       const x = cx + this.radius * Math.cos(this.angle);
       const y = cy + this.radius * Math.sin(this.angle);
-
-      // Parlaklık osilatörü
       const brightness = (Math.sin(this.twinkle) + 1) / 2 * 0.8 + 0.2;
-
-      // Yıldız parlaklığı
       ctx.beginPath();
       const grad = ctx.createRadialGradient(x, y, 0, x, y, this.size * 5);
-      grad.addColorStop(0, `rgba(255, 255, 255, ${brightness})`);
+      grad.addColorStop(0, `rgba(255,255,255,${brightness})`);
       grad.addColorStop(0.5, `${this.color}88`);
       grad.addColorStop(1, `${this.color}00`);
       ctx.fillStyle = grad;
@@ -139,43 +199,29 @@
     }
   }
 
-  // Initialize stars
   function initStars() {
     stars = [];
-    for(let i = 0; i < starCount; i++) {
-      stars.push(new Star());
-    }
+    for (let i = 0; i < starCount; i++) stars.push(new Star());
   }
 
-  // Ana animasyon
   function animate() {
     ctx.clearRect(0, 0, width, height);
-
-    // Hafif merkezi parlama
     const centerGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(cx, cy));
-    centerGradient.addColorStop(0, 'rgba(255, 182, 193, 0.12)');
-    centerGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    centerGradient.addColorStop(0, 'rgba(255,182,193,0.12)');
+    centerGradient.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = centerGradient;
     ctx.fillRect(0, 0, width, height);
-
-    stars.forEach(star => {
-      star.update();
-      star.draw();
-    });
-
+    stars.forEach(s => { s.update(); s.draw(); });
     requestAnimationFrame(animate);
   }
 
-  // Setup
   window.addEventListener('resize', () => {
-    resize();
-    initStars();
+    resize(); initStars();
   });
 
   resize();
   initStars();
   animate();
-
 })();
 </script>
 
