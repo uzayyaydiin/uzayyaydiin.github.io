@@ -1,229 +1,815 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>M.Sc. Uzay Aydın</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: radial-gradient(circle at center, #2a003f 0%, #000000 90%);
-    color: #eee;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vega Uzay Store — El Yapımı Astronomi Ürünleri</title>
+  <meta name="description" content="Vega Uzay Store — El yapımı astronomi temalı mumlar, defterler, maketler ve stickerlar." />
 
-  body {
-    overflow-y: auto;
-  }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
 
-  #galaxy-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: -1;
-    display: block;
-  }
+  <style>
+    /* ─── RESET & BASE ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  header, main, footer {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 20px;
-  }
+    :root {
+      --void:    #05050f;
+      --deep:    #0b0b1e;
+      --panel:   #10102a;
+      --rim:     rgba(180,160,255,.13);
+      --gold:    #c9a84c;
+      --gold-lt: #e8d08a;
+      --mist:    rgba(200,190,255,.55);
+      --white:   #f0eeff;
+      --dim:     rgba(200,190,255,.38);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'Jost', system-ui, sans-serif;
+    }
 
-  nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0 30px 0;
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-  }
+    html { scroll-behavior: smooth; }
 
-  nav a {
-    color: #9faaff;
-    text-decoration: none;
-    font-weight: 600;
-  }
+    body {
+      background: var(--void);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
 
-  nav a:hover {
-    color: #f4a7d1;
-  }
+    /* ─── STAR CANVAS ───────────────────────────────── */
+    #star-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-  section {
-    max-width: 900px;
-    margin: 0 auto 60px auto;
-    text-align: left;
-  }
+    /* ─── GLOBAL WRAPPER ────────────────────────────── */
+    .layer { position: relative; z-index: 1; }
 
-  h1, h2 {
-    text-align: center;
-  }
+    /* ─── NAV ───────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 3rem;
+      background: linear-gradient(to bottom, rgba(5,5,15,.92) 0%, transparent 100%);
+      backdrop-filter: blur(0px);
+      transition: background .4s, backdrop-filter .4s;
+    }
+    nav.scrolled {
+      background: rgba(5,5,15,.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--rim);
+    }
 
-  .meeting {
-    margin-bottom: 30px;
-    padding: 20px;
-    background: rgba(255,255,255,0.04);
-    border-radius: 10px;
-  }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      color: var(--gold-lt);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--mist); font-weight: 300; }
 
-  .meeting h3 {
-    margin-top: 0;
-    color: #f4a7d1;
-  }
+    .nav-links {
+      display: flex;
+      gap: 2.4rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: .82rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      transition: color .25s;
+    }
+    .nav-links a:hover { color: var(--white); }
 
-  .meta {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    margin-bottom: 10px;
-  }
+    .nav-cta {
+      font-size: .78rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,.4);
+      padding: .45rem 1.2rem;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background .25s, color .25s;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--void); }
 
-  footer p {
-    font-size: 0.9rem;
-    opacity: 0.6;
-  }
-</style>
+    /* ─── HERO ──────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 6rem;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      font-size: .72rem;
+      letter-spacing: .32em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeUp .9s .3s forwards;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.4rem, 9vw, 8rem);
+      font-weight: 300;
+      line-height: 1.02;
+      letter-spacing: .04em;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeUp .9s .5s forwards;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold-lt);
+    }
+
+    .hero-sub {
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: var(--mist);
+      max-width: 38rem;
+      line-height: 1.9;
+      opacity: 0;
+      animation: fadeUp .9s .75s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1.2rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp .9s 1s forwards;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--void);
+      padding: .8rem 2.2rem;
+      border-radius: 2px;
+      font-family: var(--font-body);
+      font-size: .8rem;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background .25s, transform .2s;
+    }
+    .btn-primary:hover { background: var(--gold-lt); transform: translateY(-2px); }
+
+    .btn-ghost {
+      border: 1px solid var(--rim);
+      color: var(--mist);
+      padding: .8rem 2.2rem;
+      border-radius: 2px;
+      font-family: var(--font-body);
+      font-size: .8rem;
+      font-weight: 400;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: border-color .25s, color .25s;
+    }
+    .btn-ghost:hover { border-color: var(--mist); color: var(--white); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      color: var(--dim);
+      font-size: .68rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      animation: fadeUp .9s 1.3s forwards;
+      opacity: 0;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    /* ─── DIVIDER ───────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin: 0 auto;
+      width: fit-content;
+      padding: 1rem 0;
+    }
+    .divider-line {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+    .divider-line.rev { background: linear-gradient(to left, transparent, var(--gold)); }
+    .divider-star { color: var(--gold); font-size: .9rem; }
+
+    /* ─── SECTION COMMON ────────────────────────────── */
+    section { padding: 7rem 2rem; }
+
+    .section-label {
+      font-size: .7rem;
+      letter-spacing: .32em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: .8rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 300;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-desc {
+      text-align: center;
+      color: var(--mist);
+      max-width: 40rem;
+      margin: 0 auto 4rem;
+      line-height: 2;
+      font-size: .95rem;
+    }
+
+    /* ─── PRODUCTS ──────────────────────────────────── */
+    #urunler { background: var(--deep); }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .product-card {
+      border: 1px solid var(--rim);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--panel);
+      transition: transform .3s, border-color .3s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(201,168,76,.35);
+    }
+
+    .product-thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      background: linear-gradient(135deg, rgba(20,20,50,1) 0%, rgba(10,10,30,1) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .product-thumb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(201,168,76,.08) 0%, transparent 70%);
+    }
+
+    .product-info {
+      padding: 1.4rem 1.4rem 1.8rem;
+    }
+    .product-tag {
+      font-size: .65rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .4rem;
+    }
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: .5rem;
+      color: var(--white);
+    }
+    .product-desc {
+      font-size: .84rem;
+      color: var(--dim);
+      line-height: 1.7;
+    }
+
+    /* ─── HAKKIMIZDA ────────────────────────────────── */
+    #hakkimizda {
+      background: var(--void);
+      overflow: hidden;
+    }
+
+    .about-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .about-visual {
+      position: relative;
+    }
+    .orbit-ring {
+      width: 320px;
+      height: 320px;
+      border: 1px solid var(--rim);
+      border-radius: 50%;
+      position: relative;
+      margin: 0 auto;
+      animation: spinSlow 40s linear infinite;
+    }
+    .orbit-ring::after {
+      content: '✦';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--gold);
+      font-size: .9rem;
+    }
+    .orbit-inner {
+      width: 200px;
+      height: 200px;
+      border: 1px solid rgba(201,168,76,.2);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spinSlow 25s linear infinite reverse;
+    }
+    .orbit-core {
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle, rgba(201,168,76,.25), transparent);
+      border: 1px solid rgba(201,168,76,.4);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .about-text {}
+    .about-text .section-label { text-align: left; }
+    .about-text .section-title { text-align: left; font-size: 2.4rem; }
+
+    .about-body {
+      color: var(--mist);
+      line-height: 2.1;
+      font-size: .92rem;
+      margin-top: 1.5rem;
+    }
+
+    .about-stats {
+      display: flex;
+      gap: 2.5rem;
+      margin-top: 2.5rem;
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 300;
+      color: var(--gold-lt);
+      line-height: 1;
+    }
+    .stat-lbl {
+      font-size: .72rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: .3rem;
+    }
+
+    /* ─── SOCIALS / CTA ─────────────────────────────── */
+    #sosyal {
+      background: linear-gradient(to bottom, var(--deep), var(--void));
+      text-align: center;
+    }
+
+    .social-cards {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+    }
+
+    .social-card {
+      border: 1px solid var(--rim);
+      border-radius: 4px;
+      padding: 1.8rem 2.8rem;
+      text-decoration: none;
+      color: var(--mist);
+      background: var(--panel);
+      transition: border-color .25s, transform .25s, color .25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .8rem;
+      min-width: 160px;
+    }
+    .social-card:hover {
+      border-color: rgba(201,168,76,.4);
+      transform: translateY(-4px);
+      color: var(--white);
+    }
+    .social-icon { font-size: 1.8rem; }
+    .social-name {
+      font-size: .72rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+    }
+
+    /* ─── NEWSLETTER ────────────────────────────────── */
+    #iletisim {
+      background: var(--void);
+      border-top: 1px solid var(--rim);
+    }
+
+    .newsletter-box {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .newsletter-form {
+      display: flex;
+      gap: .8rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .newsletter-form input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--panel);
+      border: 1px solid var(--rim);
+      border-radius: 2px;
+      padding: .75rem 1.2rem;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .25s;
+    }
+    .newsletter-form input:focus { border-color: rgba(201,168,76,.5); }
+    .newsletter-form input::placeholder { color: var(--dim); }
+    .newsletter-form button {
+      background: var(--gold);
+      color: var(--void);
+      border: none;
+      padding: .75rem 1.6rem;
+      border-radius: 2px;
+      font-family: var(--font-body);
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .25s;
+    }
+    .newsletter-form button:hover { background: var(--gold-lt); }
+
+    /* ─── FOOTER ────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--rim);
+      padding: 2.5rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--gold-lt);
+      letter-spacing: .1em;
+    }
+    .footer-copy {
+      font-size: .74rem;
+      color: var(--dim);
+      letter-spacing: .1em;
+    }
+    .footer-shopify {
+      font-size: .74rem;
+      color: var(--dim);
+    }
+    .footer-shopify a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .footer-shopify a:hover { color: var(--gold-lt); }
+
+    /* ─── ANIMATIONS ────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(1); opacity: 1; }
+      50%       { transform: scaleY(.6); opacity: .5; }
+    }
+    @keyframes spinSlow {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinSlow-abs {
+      to { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+
+    /* ─── SCROLL REVEAL ─────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── RESPONSIVE ────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 1.2rem 1.4rem; }
+      .nav-links { display: none; }
+      .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .orbit-ring { width: 220px; height: 220px; }
+      .orbit-inner { width: 140px; height: 140px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="galaxy-canvas"></canvas>
+  <!-- Stars -->
+  <canvas id="star-canvas"></canvas>
 
-<header>
-  <nav>
-    <ul>
-      <li><a href="index.html">Ana Sayfa</a></li>
-      <li><a href="publications.html">Yayınlar</a></li>
-      <li><a href="research.html">Araştırma</a></li>
-      <li><a href="cv.pdf" target="_blank">CV</a></li>
-      <li><a href="contact.html">İletişim</a></li>
+  <!-- NAV -->
+  <nav id="nav" class="layer">
+    <a href="#" class="nav-logo">Vega <span>Uzay Store</span></a>
+    <ul class="nav-links">
+      <li><a href="#urunler">Ürünler</a></li>
+      <li><a href="#hakkimizda">Hakkımızda</a></li>
+      <li><a href="#sosyal">Sosyal Medya</a></li>
+      <li><a href="#iletisim">İletişim</a></li>
     </ul>
+    <a href="https://www.shopify.com" target="_blank" class="nav-cta">Alışverişe Başla →</a>
   </nav>
-</header>
 
-<main>
-
-  <section id="about">
-    <h1>M.Sc. Uzay Aydın</h1>
-    <p style="text-align:center;">
-      Astronomy & Astrophysics · Galaxy Evolution · AGN · Astrostatistics
+  <!-- HERO -->
+  <section id="hero" class="layer">
+    <p class="hero-eyebrow">✦ El Yapımı · Astronomi Temalı · Türkiye'den ✦</p>
+    <h1 class="hero-title">
+      Evrenin<br/><em>Güzelliğini</em><br/>Dokunuşa Dönüştür
+    </h1>
+    <p class="hero-sub">
+      Vega Uzay Store olarak gökyüzünün derinliğini günlük hayatınıza taşıyoruz.
+      El yapımı mumlar, astronomi defterleri, maketler ve özel stickerlarımızla
+      evrenin büyüsü artık elinizin altında.
     </p>
+    <div class="hero-actions">
+      <a href="https://www.shopify.com" target="_blank" class="btn-primary">Mağazaya Git</a>
+      <a href="#urunler" class="btn-ghost">Ürünleri Keşfet</a>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Keşfet</span>
+    </div>
   </section>
 
-  <section id="meetings">
-    <h2>Meetings & Workshops</h2>
+  <!-- PRODUCTS -->
+  <section id="urunler" class="layer">
+    <p class="section-label">Koleksiyonumuz</p>
+    <h2 class="section-title reveal">Seçkin <em style="font-family:var(--font-display);font-style:italic;color:var(--gold-lt)">El Yapımı</em> Ürünler</h2>
+    <p class="section-desc reveal">Her ürün, gökyüzüne olan sevgimizle tasarlanır ve özenle üretilir.</p>
 
-    <div class="meeting">
-      <h3>Astrostatistics Summer School (19th)</h3>
-      <div class="meta">
-        Penn State Eberly College of Science — June 2024
+    <div class="product-grid">
+
+      <div class="product-card reveal">
+        <div class="product-thumb">🕯️</div>
+        <div class="product-info">
+          <p class="product-tag">El Yapımı Mum</p>
+          <h3 class="product-name">Nebula Koleksiyonu</h3>
+          <p class="product-desc">Gezegenlerden ilham alan renk geçişleri ve büyüleyici koku harmonileriyle özel mum serisi.</p>
+        </div>
       </div>
-      <p>
-        Successfully completed the 19th Astrostatistics Summer School, an intensive program focused on
-        R programming, data science, data analysis, and astrostatistics. The program included advanced
-        training in statistical methodologies applied to astronomical research, with lectures and hands-on
-        sessions led by experts such as Eric Feigelson and Dr. Jogesh Babu.
-      </p>
-    </div>
 
-    <div class="meeting">
-      <h3>LSST AGN Science Collaboration Meeting 2025</h3>
-      <div class="meta">
-        Durham University, United Kingdom — July 2025
+      <div class="product-card reveal">
+        <div class="product-thumb">📓</div>
+        <div class="product-info">
+          <p class="product-tag">El Yapımı Defter</p>
+          <h3 class="product-name">Gökada Günlüğü</h3>
+          <p class="product-desc">Yıldız haritaları ve astronomik illüstrasyonlarla süslenmiş, özel üretim astronomi defterleri.</p>
+        </div>
       </div>
-      <p>
-        Participated in the LSST AGN Science Collaboration Meeting held at Durham University.
-        The meeting brought together researchers working on Active Galactic Nuclei within the LSST framework.
-        Scientific discussions covered AGN selection techniques, time-domain science, photometric
-        classification, and preparatory work for LSST Data Release 1.
-      </p>
-      <p>
-        Engaged in collaborative sessions on galaxy–AGN co-evolution, variability-based selection methods,
-        and data-intensive analysis workflows, gaining insight into large-scale extragalactic survey
-        planning and international collaboration.
-      </p>
-    </div>
 
+      <div class="product-card reveal">
+        <div class="product-thumb">🚀</div>
+        <div class="product-info">
+          <p class="product-tag">Maket & Koleksiyon</p>
+          <h3 class="product-name">Uzay Araçları</h3>
+          <p class="product-desc">El boyaması, detaylı roket ve uzay mekiği maketleri. Her biri benzersiz bir koleksiyon parçası.</p>
+        </div>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-thumb">⭐</div>
+        <div class="product-info">
+          <p class="product-tag">Sticker & Aksesuar</p>
+          <h3 class="product-name">Yıldız Haritası</h3>
+          <p class="product-desc">Takım yıldızları, gezegenler ve uzay temalı özel tasarım sticker setleri.</p>
+        </div>
+      </div>
+
+    </div>
   </section>
 
-</main>
+  <!-- HAKKIMIZDA -->
+  <section id="hakkimizda" class="layer">
+    <div class="about-inner">
+      <div class="about-visual reveal">
+        <div class="orbit-ring">
+          <div class="orbit-inner"></div>
+          <div class="orbit-core" style="animation:spinSlow-abs 25s linear infinite reverse;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">🌌</div>
+        </div>
+      </div>
+      <div class="about-text reveal">
+        <p class="section-label">Hikayemiz</p>
+        <h2 class="section-title">Yıldızlara<br/><em style="font-family:var(--font-display);font-style:italic;color:var(--gold-lt)">Tutkuyla</em> Doğduk</h2>
+        <div class="about-body">
+          <p>Vega Uzay Store, gökyüzüne olan derin bir hayranlıktan doğdu.
+          Evrenin sonsuz güzelliğini günlük objelerle buluşturmak istedik.</p>
+          <br/>
+          <p>Her ürünümüz, astronomi dünyasından ilham alan özel tasarımlarla
+          hazırlanır. Mumlarımızın her kokusu bir gezegenin atmosferini,
+          defterlerimizin her sayfası keşfedilmeyi bekleyen bir evreni temsil eder.</p>
+        </div>
+        <div class="about-stats">
+          <div>
+            <div class="stat-num">100%</div>
+            <div class="stat-lbl">El Yapımı</div>
+          </div>
+          <div>
+            <div class="stat-num">∞</div>
+            <div class="stat-lbl">Tasarım Sevgisi</div>
+          </div>
+          <div>
+            <div class="stat-num">🇹🇷</div>
+            <div class="stat-lbl">Türkiye'den</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<footer>
-  <p>&copy; 2025 Uzay Aydın. All rights reserved.</p>
-</footer>
+  <!-- SOSYAL -->
+  <section id="sosyal" class="layer">
+    <p class="section-label">Bizi Takip Edin</p>
+    <h2 class="section-title reveal">Galaksimize<br/>Katılın</h2>
+    <p class="section-desc reveal">Yeni ürünler, üretim süreci ve astronomi dünyasından haberler için sosyal medyamızı takip edin.</p>
 
-<script>
-(() => {
-  const canvas = document.getElementById('galaxy-canvas');
-  const ctx = canvas.getContext('2d');
-  let width, height, cx, cy;
-  let stars = [];
-  const starCount = 350;
-  const colors = ['#7b68ee', '#ff69b4', '#00bfff', '#dda0dd'];
+    <div class="social-cards">
+      <a href="#" class="social-card reveal" target="_blank">
+        <span class="social-icon">📸</span>
+        <span class="social-name">Instagram</span>
+      </a>
+      <a href="#" class="social-card reveal" target="_blank">
+        <span class="social-icon">🛒</span>
+        <span class="social-name">Shopify Mağaza</span>
+      </a>
+      <a href="#" class="social-card reveal" target="_blank">
+        <span class="social-icon">💬</span>
+        <span class="social-name">Etsy</span>
+      </a>
+    </div>
+  </section>
 
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    cx = width / 2;
-    cy = height / 2;
-    canvas.width = width;
-    canvas.height = height;
-  }
+  <!-- NEWSLETTER -->
+  <section id="iletisim" class="layer">
+    <div class="newsletter-box">
+      <p class="section-label">Haberdar Olun</p>
+      <h2 class="section-title reveal" style="font-size:2rem">Yeni Ürünlerden<br/>İlk Siz Haberdar Olun</h2>
+      <p class="section-desc reveal" style="margin-bottom:0">Lansman öncesi indirimler ve özel koleksiyonlar için bültenimize kayıt olun.</p>
+      <form class="newsletter-form" onsubmit="handleForm(event)">
+        <input type="email" placeholder="e-posta adresiniz" required />
+        <button type="submit">Kayıt Ol</button>
+      </form>
+      <p id="form-msg" style="margin-top:1rem;font-size:.82rem;color:var(--gold);display:none">✦ Kayıt başarılı, teşekkürler!</p>
+    </div>
+  </section>
 
-  class Star {
-    constructor() { this.reset(); }
-    reset() {
-      this.radius = Math.random() * (Math.min(cx, cy) - 20);
-      this.angle = Math.random() * 2 * Math.PI;
-      this.size = 0.8 + Math.random() * 1.5;
-      this.speed = 0.001 + Math.random() * 0.003;
-      this.color = colors[Math.floor(Math.random() * colors.length)];
-      this.twinkle = Math.random() * 1000;
+  <!-- FOOTER -->
+  <footer class="layer">
+    <div class="footer-logo">✦ Vega Uzay Store</div>
+    <div class="footer-copy">© 2025 Vega Uzay Store. Tüm hakları saklıdır.</div>
+    <div class="footer-shopify">Alışveriş için → <a href="https://www.shopify.com" target="_blank">Mağazamız</a></div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // ── STARS ──────────────────────────────────────────
+    const canvas = document.getElementById('star-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const N = 200;
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
-    update() {
-      this.radius += this.speed;
-      if (this.radius > Math.min(cx, cy)) this.reset();
-      this.twinkle += 0.02;
+
+    function initStars() {
+      stars = Array.from({ length: N }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + .2,
+        a: Math.random(),
+        s: Math.random() * .004 + .001,
+        d: Math.random() < .5 ? 1 : -1,
+      }));
     }
-    draw() {
-      const x = cx + this.radius * Math.cos(this.angle);
-      const y = cy + this.radius * Math.sin(this.angle);
-      const brightness = (Math.sin(this.twinkle) + 1) / 2 * 0.8 + 0.2;
-      ctx.beginPath();
-      const grad = ctx.createRadialGradient(x, y, 0, x, y, this.size * 5);
-      grad.addColorStop(0, `rgba(255,255,255,${brightness})`);
-      grad.addColorStop(0.5, `${this.color}88`);
-      grad.addColorStop(1, `${this.color}00`);
-      ctx.fillStyle = grad;
-      ctx.arc(x, y, this.size * 2, 0, 2 * Math.PI);
-      ctx.fill();
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.a += s.s * s.d;
+        if (s.a <= 0 || s.a >= 1) s.d *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(220,210,255,${s.a})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
     }
-  }
 
-  function initStars() {
-    stars = [];
-    for (let i = 0; i < starCount; i++) stars.push(new Star());
-  }
+    resize();
+    initStars();
+    drawStars();
+    window.addEventListener('resize', () => { resize(); initStars(); });
 
-  function animate() {
-    ctx.clearRect(0, 0, width, height);
-    const centerGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(cx, cy));
-    centerGradient.addColorStop(0, 'rgba(255,182,193,0.12)');
-    centerGradient.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = centerGradient;
-    ctx.fillRect(0, 0, width, height);
-    stars.forEach(s => { s.update(); s.draw(); });
-    requestAnimationFrame(animate);
-  }
+    // ── NAV SCROLL ─────────────────────────────────────
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
 
-  window.addEventListener('resize', () => {
-    resize(); initStars();
-  });
+    // ── REVEAL ─────────────────────────────────────────
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: .15 });
+    reveals.forEach(el => obs.observe(el));
 
-  resize();
-  initStars();
-  animate();
-})();
-</script>
+    // ── FORM ───────────────────────────────────────────
+    function handleForm(e) {
+      e.preventDefault();
+      document.getElementById('form-msg').style.display = 'block';
+      e.target.reset();
+    }
+  </script>
 
 </body>
 </html>
